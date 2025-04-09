@@ -1,0 +1,37 @@
+FROM ubuntu:20.04
+
+#Avoid prompts during instalation
+ENV DEBIAN_FRONTEND=noneinteractive
+
+#Install python curl and node
+RUN apt-get update && apt-get install -y \
+    python2.7 \
+    curl \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+#Install pip for python 2
+RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py \
+    && python2.7 get-pip.py \
+    && rm get-pip.py
+
+WORKDIR /app
+
+#Copy application code
+COPY flask-app ./flask-app
+COPY flask-app/static ./static
+
+#Install Python dependencies
+COPY flask-app/requirements.txt ./
+RUN pip install -r requirements.txt
+
+#Install Node dependencies and build frontend
+COPY flask-app/package*.json ./
+RUN npm install
+
+#expose Port
+EXPOSE 5000
+
+#start the application
+ENTRYPOINT [ "python2.7", "flask-app/app.py" ]

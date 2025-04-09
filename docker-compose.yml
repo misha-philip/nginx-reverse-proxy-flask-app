@@ -1,0 +1,43 @@
+services:
+  es:
+    image: elasticsearch:7.17.13
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - foodtrucks-db
+  
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask-app
+    depends_on:
+      - es
+    environment:
+      - ELASTICSEARCH_HOST=es
+    networks:
+      - foddtrucks-db
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/ngnix.conf
+    depends_on:
+      - flask-app
+    networks:
+      - foodtrucks-net
+
+networks:
+  foodtrucks-db:
+    driver: bridge
+  foodtrucks-net:
+    driver: bridge
+
+volumes:
+  es_data:
+    driver: local
