@@ -19,7 +19,7 @@ services:
     environment:
       - ELASTICSEARCH_HOST=es
     networks:
-      - foddtrucks-db
+      - foodtrucks-db
 
   nginx:
     image: nginx:alpine
@@ -27,6 +27,8 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/ngnix.conf
+      - ./flask-app/static:/usr/share/nginx/html/static
+      - ./flask-app/templates:/usr/share/nginx/html
     depends_on:
       - flask-app
     networks:
